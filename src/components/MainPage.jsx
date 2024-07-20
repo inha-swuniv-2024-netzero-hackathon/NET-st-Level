@@ -3,7 +3,6 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import Image from 'next/image'
 import ArrowIcon from '../../public/arrow.svg'
-import ali from '../../public/menu1.png'
 import { Button, Checkbox, cn, Textarea } from '@nextui-org/react';
 
 function MainPage(props) {
@@ -22,6 +21,7 @@ function MainPage(props) {
     const [recipe, setRecipe] = useState([]);
     const [reciipe, setReciipe] = useState([]);
     const [recipetext, setRecipetext] = useState(''); // 새로운 상태 추가
+    const [sesinfo, setSesinfo] = useState([]);
 
 
     useEffect(() => {
@@ -141,58 +141,64 @@ function MainPage(props) {
     };
 
     useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const storedData = window.sessionStorage.getItem('data');
+            if (storedData) {
+                setSesinfo(JSON.parse(storedData));
+            }
+        }
         const login = window.sessionStorage.getItem('isLogged');
         if (!login || login === 'false') {
             window.location.href = '/login';
-        } else{
+        } else {
             setIsLogged(true);
-            if(window.sessionStorage.getItem('servingSize') == "null"){
+            if (JSON.parse(window.sessionStorage.getItem('data')).servingSize === null) {
                 setPageNumber(2); // 2
-            }else{
+            } else {
                 setPageNumber(1);
             }
         }
     }, []);
-
+    
     useEffect(() => {
         async function fetchData() {
-        if (pageNumber === 1){
             const response1 = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/recipe', {
                 method: 'GET',
             });
-
-            if(response1.status !== 200) {
+    
+            if (response1.status !== 200) {
                 alert('레시피를 불러오는데 실패했습니다.');
                 return;
-            } else{
+            } else {
                 const data = await response1.json();
                 console.log(data.response);
                 setRecipe(data.response);
             }
-            const response3 = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({"name": window.sessionStorage.getItem('name'), "email" : window.sessionStorage.getItem('email')})
-            });
-
-            if(response3.status !== 200) {
-                alert('로그인에 실패했습니다.');
-            } else{
-                const data = await response3.json();
-                console.log(data.response);
-                window.sessionStorage.setItem('isLogged', true);
-                window.sessionStorage.setItem('name', data.response.name);
-                window.sessionStorage.setItem('email', data.response.email);
-                window.sessionStorage.setItem('id', data.response.id);
-                window.sessionStorage.setItem('servingSize', data.response.servingSize);
+            if (sesinfo.name && sesinfo.email) {
+                const response3 = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ "name": sesinfo.name, "email": sesinfo.email })
+                });
+    
+                if (response3.status !== 200) {
+                    alert('로그인에 실패했습니다.');
+                } else {
+                    const data = await response3.json();
+                    console.log(data.response);
+    
+                    setSesinfo(data.response);
+                }
             }
         }
+        if (sesinfo.name && sesinfo.email) {
+            fetchData();
         }
-        fetchData();
-    }, [pageNumber]);
-
+        console.log("sesinfo", sesinfo);
+    }, [sesinfo, pageNumber]);
+    
     const renderPage = () => {
         console.log(pageNumber);
         switch (pageNumber) {
@@ -201,7 +207,7 @@ function MainPage(props) {
             <>
                 <div className='flex w-5/6 text-[#999999] text-opacity-50 text-xs pb-2'>밥 한 공기가 1인분이라고 가정할 때,</div>
                 <div className='flex w-5/6 justify-center items-end border-2 border-[#F7941D] rounded-md text-[#F7941D] text-sm font-medium py-3'>
-                    당신의 혼밥 양은&nbsp;<span className='text-3xl leading-none'>{parseFloat(window.sessionStorage.getItem('servingSize')).toFixed(2)}</span>&nbsp;공기 입니다
+                    당신의 혼밥 양은&nbsp;<span className='text-3xl leading-none'>{parseFloat(sesinfo.servingSize).toFixed(2)}</span>&nbsp;공기 입니다
                 </div>
                 <div><Image src={ArrowIcon} width={25} className='mt-4 mb-10'/></div>
                 <div className='flex justify-center items-center text-[#F7941D] text-4xl font-medium'>레시피 보기</div>
@@ -209,7 +215,7 @@ function MainPage(props) {
                     <div className='p-3 grid gap-4 grid-cols-3 overflow-y-auto w-full h-72 mx-1 bg-[#F6F6F6]'>
                         {recipe.map((item) => (
                         <div key={item.id} className='flex flex-col justify-center items-center' onClick={async e=>{
-                            const response = await fetch(`http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/recipe/${item.id}?memberId=${window.sessionStorage.getItem('id')}`, {
+                            const response = await fetch(`http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/recipe/${item.id}?memberId=${sesinfo.id}`, {
                                 method: 'GET',
                             });
                             if(response.status !== 200) {
@@ -337,7 +343,7 @@ function MainPage(props) {
                             </div>
                         </div>
                         <div className='flex mb-5 flex-col w-full p-3 border-1 items-start justify-center h-56 text-[#A1A1A1] border-[#A1A1A1]'>
-                            <div className='flex w-full justify-start text-xs'>1. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L사이즈 피자 3조각이면 배부르신가요?</div>
+                            <div className='flex w-full justify-start text-xs'>3. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L사이즈 피자 3조각이면 배부르신가요?</div>
                             <div className='flex flex-col w-full px-3 pt-5'>
                                 <Checkbox size="sm" color="warning" radius="none"
                                 classNames={{
@@ -382,7 +388,7 @@ function MainPage(props) {
                             </div>
                         </div>
                         <div className='flex mb-5 flex-col w-full p-3 border-1 items-start justify-center h-56 text-[#A1A1A1] border-[#A1A1A1]'>
-                            <div className='flex w-full justify-start text-xs'>1. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;햄버거 세트 한 세트로 만족하실 수 있나요?</div>
+                            <div className='flex w-full justify-start text-xs'>4. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;햄버거 세트 한 세트로 만족하실 수 있나요?</div>
                             <div className='flex flex-col w-full px-3 pt-5'>
                                 <Checkbox size="sm" color="warning" radius="none"
                                 classNames={{
@@ -427,7 +433,7 @@ function MainPage(props) {
                             </div>
                         </div>
                         <div className='flex mb-5 flex-col w-full p-3 border-1 items-start justify-center h-56 text-[#A1A1A1] border-[#A1A1A1]'>
-                            <div className='flex w-full justify-start text-xs'>1. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;김밥 한 줄이 딱 맞나요?</div>
+                            <div className='flex w-full justify-start text-xs'>5. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;김밥 한 줄이 딱 맞나요?</div>
                             <div className='flex flex-col w-full px-3 pt-5'>
                                 <Checkbox size="sm" color="warning" radius="none"
                                 classNames={{
@@ -484,7 +490,7 @@ function MainPage(props) {
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({"memberId": window.sessionStorage.getItem('id'), "score": [q1val,q2val,q3val,q4val,q5val]})
+                                body: JSON.stringify({"memberId": sesinfo.id, "score": [q1val,q2val,q3val,q4val,q5val]})
                             });
                             if(response.status !== 200) {
                                 alert('1인분 계산을 저장하는데 실패했습니다.');
@@ -492,7 +498,7 @@ function MainPage(props) {
                             } else{
                                 const data = await response.json();
                                 console.log(data)
-                                window.sessionStorage.setItem('servingSize', data.response);
+                                setSesinfo(data.response);
                                 setPageNumber(1);
                             }
                         }
@@ -534,7 +540,7 @@ function MainPage(props) {
                 </div>
                 <div className='pt-4 text-2xl text-[#F7371D]'> 절감한 탄소 배출량</div>
                 <div><Image src={ArrowIcon} width={25} className='mt-4 mb-6'/></div>
-                <div className='flex w-full justify-center text-center text-[#F7371D]'>{reciipe.reducedCo2.toFixed(1)} kgCO2e <span className='text-[#F7941D]'> &nbsp;온실가스 배출을 줄였습니다</span></div>
+                <div className='flex w-full justify-center text-center text-[#F7371D]'>{reciipe.reducedCo2.toFixed(1)} g <span className='text-[#F7941D]'> &nbsp;온실가스 배출을 줄였습니다</span></div>
                 <div className='flex w-full justify-center text-center text-[#F7371D] pt-1'>소나무 {(0.15*reciipe.reducedCo2).toFixed(1)}그루 <span className='text-[#F7941D]'> &nbsp;를 살렸습니다</span></div>
                 <div className='flex w-full mt-7 mb-16 justify-center'>
                     <Button radius="sm" size="sm" className='w-5/6 text-white bg-[#F7941D] '
@@ -558,12 +564,13 @@ function MainPage(props) {
                     </div>
                     <div className='flex flex-row justify-between items-center w-full'>
                         <Button radius="sm" size="sm" className='bg-[#F6F6F6] h-14' onPress={async e=>{
+                            alert("투표를 완료하였습니다.");
                             const response = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/feedback', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({"memberId": window.sessionStorage.getItem('id'), "feedback" : false})
+                                body: JSON.stringify({"memberId": sesinfo.id, "feedback" : false})
                             });
                             if(response.status !== 200) {
                                 alert('평가를 저장하는데 실패했습니다.');
@@ -576,7 +583,7 @@ function MainPage(props) {
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({"memberId": window.sessionStorage.getItem('id'), "carbonPledge" : reciipe.reducedCo2})
+                                body: JSON.stringify({"memberId": sesinfo.id, "carbonPledge" : reciipe.reducedCo2})
                             });
                             if(response2.status !== 200) {
                                 alert('평가를 저장하는데 실패했습니다.');
@@ -585,12 +592,13 @@ function MainPage(props) {
                             }
                         }}>부족했어요</Button>    
                         <Button radius="sm" size="sm" className='bg-[#F6F6F6] h-14' onPress={async e=>{
+                            alert("투표를 완료하였습니다.");
                             const response = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/feedback', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({"memberId": window.sessionStorage.getItem('id'), "feedback" : null})
+                                body: JSON.stringify({"memberId": sesinfo.id, "feedback" : null})
                             });
                             if(response.status !== 200) {
                                 alert('평가를 저장하는데 실패했습니다.');
@@ -603,7 +611,7 @@ function MainPage(props) {
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({"memberId": window.sessionStorage.getItem('id'), "carbonPledge" : reciipe.reducedCo2})
+                                body: JSON.stringify({"memberId": sesinfo.id, "carbonPledge" : reciipe.reducedCo2})
                             });
                             if(response2.status !== 200) {
                                 alert('평가를 저장하는데 실패했습니다.');
@@ -612,12 +620,13 @@ function MainPage(props) {
                             }
                         }}>딱 좋아요</Button>    
                         <Button radius="sm" size="sm" className='bg-[#F6F6F6] h-14' onPress={async e=>{
+                            alert("투표를 완료하였습니다.");
                             const response = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/feedback', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({"memberId": window.sessionStorage.getItem('id'), "feedback" : true})
+                                body: JSON.stringify({"memberId": sesinfo.id, "feedback" : true})
                             });
                             if(response.status !== 200) {
                                 alert('평가를 저장하는데 실패했습니다.');
@@ -630,7 +639,7 @@ function MainPage(props) {
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({"memberId": window.sessionStorage.getItem('id'), "carbonPledge" : reciipe.reducedCo2})
+                                body: JSON.stringify({"memberId": sesinfo.id, "carbonPledge" : reciipe.reducedCo2})
                             });
                             if(response2.status !== 200) {
                                 alert('평가를 저장하는데 실패했습니다.');
@@ -657,7 +666,38 @@ function MainPage(props) {
                 </div>
                 <div className='flex w-full mt-7 mb-16 justify-end'>
                     <Button radius="sm" size="sm" className=' mr-2 text-white bg-[#F7941D] '
-                    onPress={e=>{alert('피드백을 남겼습니다.'); setPageNumber(1);}}
+                    onPress={e=>{alert('피드백을 남겼습니다.');
+                        async function fetchData() {
+                            const response1 = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/recipe', {
+                                method: 'GET',
+                            });
+                
+                            if(response1.status !== 200) {
+                                alert('레시피를 불러오는데 실패했습니다.');
+                                return;
+                            } else{
+                                const data = await response1.json();
+                                console.log(data.response);
+                                setRecipe(data.response);
+                            }
+                            const response3 = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/login', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({"name": sesinfo.name, "email" : sesinfo.email})
+                            });
+                
+                            if(response3.status !== 200) {
+                                alert('로그인에 실패했습니다.22');
+                            } else{
+                                const data = await response3.json();
+                                console.log(data.response);
+                                setSesinfo(data.response);
+                            }
+                        }
+                        fetchData();
+                        setPageNumber(1);}}
                     >전송하기</Button>
                 </div>
                 </div>);

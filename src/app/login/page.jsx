@@ -76,12 +76,12 @@ function Page(props) {
                         } else{
                             const data = await response.json();
                             console.log(data.response);
-                            window.sessionStorage.setItem('isLogged', true);
-                            window.sessionStorage.setItem('name', data.response.name);
-                            window.sessionStorage.setItem('email', data.response.email);
-                            window.sessionStorage.setItem('id', data.response.id);
-                            window.sessionStorage.setItem('servingSize', data.response.servingSize);
+                            if(typeof window !== 'undefined') {
+                                const ss = window.sessionStorage;
+                                ss.setItem('isLogged', true);
+                                ss.setItem('data', JSON.stringify(data.response));
                             router.push('/');
+                            }
                         }
                     }
                 }} className='mt-4 bg-[#4A5667] text-white font-bold w-5/6'>로그인</Button>
