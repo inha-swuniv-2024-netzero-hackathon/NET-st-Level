@@ -63,7 +63,7 @@ function Page(props) {
                     } else{
                         setIsName(false);
                         setIsEmail(false);
-                        const response = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/login', {
+                        const response = await fetch('/api/v1/member/login', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'

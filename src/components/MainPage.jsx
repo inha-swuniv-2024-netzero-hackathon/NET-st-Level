@@ -162,7 +162,7 @@ function MainPage(props) {
     
     useEffect(() => {
         async function fetchData() {
-            const response1 = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/recipe', {
+            const response1 = await fetch('/api/v1/recipe', {
                 method: 'GET',
             });
     
@@ -175,7 +175,7 @@ function MainPage(props) {
                 setRecipe(data.response);
             }
             if (sesinfo.name && sesinfo.email) {
-                const response3 = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/login', {
+                const response3 = await fetch('/api/v1/member/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -215,7 +215,7 @@ function MainPage(props) {
                     <div className='p-3 grid gap-4 grid-cols-3 overflow-y-auto w-full h-72 mx-1 bg-[#F6F6F6]'>
                         {recipe.map((item) => (
                         <div key={item.id} className='flex flex-col justify-center items-center' onClick={async e=>{
-                            const response = await fetch(`http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/recipe/${item.id}?memberId=${sesinfo.id}`, {
+                            const response = await fetch(`/api/v1/recipe/${item.id}?memberId=${sesinfo.id}`, {
                                 method: 'GET',
                             });
                             if(response.status !== 200) {
@@ -485,7 +485,7 @@ function MainPage(props) {
                             alert('모든 질문에 답해주세요');
                             return;
                         } else{
-                            const response = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/survey', {
+                            const response = await fetch('/api/v1/member/survey', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -565,7 +565,7 @@ function MainPage(props) {
                     <div className='flex flex-row justify-between items-center w-full'>
                         <Button radius="sm" size="sm" className='bg-[#F6F6F6] h-14' onPress={async e=>{
                             alert("투표를 완료하였습니다.");
-                            const response = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/feedback', {
+                            const response = await fetch('/api/v1/member/feedback', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -578,7 +578,7 @@ function MainPage(props) {
                             } else{
                             }
 
-                            const response2 = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/finish', {
+                            const response2 = await fetch('/api/v1/member/finish', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -593,7 +593,7 @@ function MainPage(props) {
                         }}>부족했어요</Button>    
                         <Button radius="sm" size="sm" className='bg-[#F6F6F6] h-14' onPress={async e=>{
                             alert("투표를 완료하였습니다.");
-                            const response = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/feedback', {
+                            const response = await fetch('/api/v1/member/feedback', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -606,7 +606,7 @@ function MainPage(props) {
                             } else{
                             }
 
-                            const response2 = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/finish', {
+                            const response2 = await fetch('/api/v1/member/finish', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -621,7 +621,7 @@ function MainPage(props) {
                         }}>딱 좋아요</Button>    
                         <Button radius="sm" size="sm" className='bg-[#F6F6F6] h-14' onPress={async e=>{
                             alert("투표를 완료하였습니다.");
-                            const response = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/feedback', {
+                            const response = await fetch('/api/v1/member/feedback', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -634,7 +634,7 @@ function MainPage(props) {
                             } else{
                             }
 
-                            const response2 = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/finish', {
+                            const response2 = await fetch('/api/v1/member/finish', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -668,7 +668,7 @@ function MainPage(props) {
                     <Button radius="sm" size="sm" className=' mr-2 text-white bg-[#F7941D] '
                     onPress={e=>{alert('피드백을 남겼습니다.');
                         async function fetchData() {
-                            const response1 = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/recipe', {
+                            const response1 = await fetch('/api/v1/recipe', {
                                 method: 'GET',
                             });
                 
@@ -680,7 +680,7 @@ function MainPage(props) {
                                 console.log(data.response);
                                 setRecipe(data.response);
                             }
-                            const response3 = await fetch('http://ec2-3-19-39-78.us-east-2.compute.amazonaws.com:8080/api/v1/member/login', {
+                            const response3 = await fetch('/api/v1/member/login', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
